@@ -1,0 +1,60 @@
+name: Issue Automation
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  issue_automation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for labels
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issueNumber = context.issue.number;
+            const labels = context.payload.issue.labels;
+
+            if (labels.length === 0) {
+              // Comment on the issue to remind the user to select a label
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: 'Please select at least one label for this issue.'
+              });
+
+              // Close the issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                state: 'closed'
+              });
+
+              return; // Stop further processing if no label is selected
+            }
+
+            const issueTitle = context.payload.issue.title;
+            const newTitle = `[CFB-${issueNumber}] ${issueTitle}`;
+
+            // Update the issue title
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              title: newTitle,
+            });
+
+            // Ensure 'Backlog' label is added
+            const labelNames = labels.map(label => label.name);
+            if (!labelNames.includes('Backlog')) {
+              labelNames.push('Backlog');
+            }
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: labelNames,
+            });
