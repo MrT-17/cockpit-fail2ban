@@ -1,0 +1,12 @@
+{
+  "version": "0.0.0",
+  "require": {
+    "cockpit": "319"
+  },
+  "tools": {
+    "fail2ban": {
+      "label": "Fail2Ban",
+      "path": "index.html"
+    }
+  }
+}
