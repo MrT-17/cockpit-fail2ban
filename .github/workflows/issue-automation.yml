@@ -7,7 +7,18 @@ on:
 jobs:
   issue_automation:
     runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.ISSUE_AUTOMATION }}
+
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
       - name: Check for labels
         uses: actions/github-script@v6
         with:
